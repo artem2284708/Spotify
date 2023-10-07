@@ -1,11 +1,9 @@
-import numpy as np
-
 import pandas as pd
 import argparse
 from typing import List, Dict
 
-def pen_file(path: str) -> List[List[object]]:
-    df = pd.read_csv(path)
+def open_file(file_path: str) -> List[List[object]]:
+    df = pd.read_csv(file_path)
     return df.values.tolist()
 
 if __name__ == "__main__":
@@ -21,6 +19,6 @@ if __name__ == "__main__":
         print("Hello world")
         print(f'File path: {args.file_path}')
 
-    table = pen_file(args.file_path)
+    table = open_file(args.file_path)
 
     print(len(table))
