@@ -1,24 +1,27 @@
 import pandas as pd
 import argparse
-from typing import List, Dict
+from typing import List
+
+
 def open_file(file_path: str) -> List[List[object]]:
     df = pd.read_csv(file_path)
     return df
 
-def get_year_stats(table: List) -> Dict:
-    stat = pd.DataFrame(table)
-    return stat.groupby(['year'])['track_id'].count()
 
-def get_top_artist_count(table, n=5):
-    artists = dict()
-    for row in table:
-        artists[row[7]] = artists.get(row[7], 0) + 1
-    return sorted(artists.items(), key=lambda x: x[1], reverse=True)[:n]
+def get_year_stats(sheet: List) -> pd.Series:
+    return sheet.groupby(['year'])['track_id'].count().to_string()
+
+
+def get_top_artist_count(sheet, n=5) -> pd.Series:
+    return sheet.groupby(['artist_name'])['track_id'].count().sort_values(ascending=False)[:n].to_string()
+
+
 if __name__ == "__main__":
     # Придумываем аргументы которые сможет прочитать прога
     parser = argparse.ArgumentParser(description="our little spotify experience")
     parser.add_argument('file_path', type=str, help="input path to our datasheet")
     parser.add_argument('-v', '--verbose', action="store_true", help="shows more info during script run")
+    parser.add_argument("-len", "--length_of_table", action="store_true", help="returns length of the table")
     parser.add_argument("-t", "--top_artists", type=int, help="returns top artists")
     parser.add_argument("-s", "--stats", action="store_true", help="returns year stats")
 
@@ -30,15 +33,16 @@ if __name__ == "__main__":
         print(f'File path: {args.file_path}')
 
     table = open_file(args.file_path)
+    print()
 
-    if args.top_artists:
-        res = get_top_artist_count(table, args.top_artists)
-        for idx, el in enumerate(res):
-            print(f"{idx + 1}) {el[0]}: {el[1]}")
+    if args.length_of_table:
+        print("Length of the table:", len(table))
+        print()
 
     if args.stats:
-        print(get_year_stats(table))
+        print('Statistic of years:', get_year_stats(table)[4:])
+        print()
 
-    value = table.values.tolist()
-
-    print('length of table:', len(value))
+    if args.top_artists:
+        print('Top artists:', get_top_artist_count(table, args.top_artists)[11:])
+        print()
